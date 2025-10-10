@@ -24,6 +24,9 @@ LearnFIL breaks down complex Filecoin concepts into bite-sized interactive modul
 
 LearnFIL offers a comprehensive, production-ready curriculum designed to take developers from zero to shipping Filecoin applications. Our hands-on approach ensures every concept is reinforced through interactive coding exercises.
 
+![Hero](./public/fil1.png)
+
+
 ### Module 1: Understanding CIDs
 **Master content addressing and cryptographic identifiers**
 
@@ -36,6 +39,9 @@ Topics covered:
 - Creating and validating CIDs
 - Content addressing vs location addressing
 - Practical applications in decentralized storage
+
+![Hero](./public/fil2.png)
+
 
 ### Module 2: Storage Deals
 **Navigate the complete storage deal lifecycle**
@@ -158,8 +164,8 @@ Topics covered:
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/learnfil.git
-cd learnfil
+git clone https://github.com/Fatumayattani/LearnFIL.git
+cd LearnFIL
 ```
 
 2. Install dependencies:
@@ -292,17 +298,12 @@ Found a bug or have a suggestion? Please open an issue on GitHub with:
 
 MIT License - see LICENSE file for details
 
-## Community
-
-- **Discord**: Join our community server
-- **Twitter**: Follow [@LearnFIL](https://twitter.com/learnfil)
-- **GitHub**: [github.com/learnfil](https://github.com/learnfil)
 
 ## Acknowledgments
 
 Built with support from the Filecoin community. Special thanks to:
 - Protocol Labs for creating Filecoin
-- The Supabase team for their excellent platform
+- Protocol Labs Dev Guild Community
 - All contributors and early testers
 
 ## Support
