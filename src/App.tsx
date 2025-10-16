@@ -185,7 +185,7 @@ function App() {
           </button>
           <div className="flex items-center gap-3">
             <a
-              href="https://github.com/filecoin-project"
+              href="https://github.com/Fatumayattani/LearnFIL"
               target="_blank"
               rel="noopener noreferrer"
               className="w-10 h-10 rounded-full bg-gray-900 hover:bg-gray-800 flex items-center justify-center transition-colors"

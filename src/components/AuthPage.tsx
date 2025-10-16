@@ -118,7 +118,7 @@ export function AuthPage({ onBack, onSuccess, initialMode = 'login' }: AuthPageP
                   </div>
                   <div className="flex-1 text-left">
                     <div className="text-lg">Continue with Email</div>
-                    <div className="text-sm opacity-80">Sign in using your email address</div>
+                    <div className="text-sm opacity-80">Sign up using your email address</div>
                   </div>
                 </button>
 
@@ -131,7 +131,7 @@ export function AuthPage({ onBack, onSuccess, initialMode = 'login' }: AuthPageP
                   </div>
                   <div className="flex-1 text-left">
                     <div className="text-lg">Connect Wallet</div>
-                    <div className="text-sm opacity-80">Use your Web3 wallet to sign in</div>
+                    <div className="text-sm opacity-80">Use your Web3 wallet to sign up</div>
                   </div>
                 </button>
               </div>
