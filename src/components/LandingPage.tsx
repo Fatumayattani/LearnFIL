@@ -71,8 +71,8 @@ export function LandingPage({ onGetStarted, onLogin }: LandingPageProps) {
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
             <div className="flex items-center gap-2 text-gray-700 bg-white px-4 py-2 rounded-full border-3 border-gray-900">
-              <Users className="w-5 h-5" />
-              <span className="text-sm font-semibold">Join 1,000+ developers</span>
+              <Rocket className="w-5 h-5" />
+              <span className="text-sm font-semibold">In early beta</span>
             </div>
           </div>
 

@@ -48,7 +48,7 @@ export function AuthPage({ onBack, onSuccess, initialMode = 'login' }: AuthPageP
     setLoading(true);
 
     try {
-      if (provider === 'metamask' && typeof window.ethereum !== 'undefined') {
+      if (provider === 'core' && typeof window.ethereum !== 'undefined') {
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
         if (accounts && accounts[0]) {
           const result = await connectWallet(accounts[0]);
@@ -58,7 +58,7 @@ export function AuthPage({ onBack, onSuccess, initialMode = 'login' }: AuthPageP
             setError(result.error || 'Failed to connect wallet');
           }
         }
-      } else if (provider === 'core' && typeof window.avalanche !== 'undefined') {
+      } else if (provider === 'metamask' && typeof window.avalanche !== 'undefined') {
         const accounts = await window.avalanche.request({ method: 'eth_requestAccounts' });
         if (accounts && accounts[0]) {
           const result = await connectWallet(accounts[0]);
