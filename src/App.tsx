@@ -1,16 +1,21 @@
 import { useState, useEffect } from 'react';
-import { BookMarked, User } from 'lucide-react';
-import { supabase } from './lib/supabase';
+import { BookMarked, User, Github } from 'lucide-react';
+import { useAuth } from './contexts/AuthContext';
+import { ProfileDropdown } from './components/ProfileDropdown';
 import type { Module, Lesson } from './lib/supabase';
 import { LandingPage } from './components/LandingPage';
 import { ModuleCard } from './components/ModuleCard';
 import { LessonList } from './components/LessonList';
 import { LessonContent } from './components/LessonContent';
 import { CodeEditor, TestResult } from './components/CodeEditor';
+import { AuthPage } from './components/AuthPage';
+import { CelebrationPage } from './components/CelebrationPage';
 import { useProgress } from './hooks/useProgress';
 import { runTests } from './utils/codeRunner';
+import { getModules, saveModules, getLessons, saveLessons } from './utils/localStorage';
+import { SEED_MODULES, SEED_LESSONS } from './data/seedData';
 
-type View = 'landing' | 'modules' | 'lessons' | 'lesson';
+type View = 'landing' | 'modules' | 'lessons' | 'lesson' | 'celebration' | 'auth-signup' | 'auth-login';
 
 function App() {
   const [view, setView] = useState<View>('landing');
@@ -21,46 +26,44 @@ function App() {
   const [currentCode, setCurrentCode] = useState('');
   const [testResults, setTestResults] = useState<TestResult[]>([]);
   const [isRunning, setIsRunning] = useState(false);
-  const [userId] = useState('demo-user-123');
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const { user, loading: authLoading } = useAuth();
 
-  const { progress, loading, markLessonComplete, isLessonComplete, getCompletedLessonIds } = useProgress(userId);
+  const { loading, markLessonComplete, isLessonComplete, getCompletedLessonIds } = useProgress(user?.id || 'demo-user');
 
   useEffect(() => {
     loadModules();
   }, []);
 
-  const loadModules = async () => {
-    const { data, error } = await supabase
-      .from('modules')
-      .select('*')
-      .order('order_index');
+  const initializeData = () => {
+    const existingModules = getModules();
+    const existingLessons = getLessons();
 
-    if (error) {
-      console.error('Error loading modules:', error);
-      return;
+    if (existingModules.length === 0) {
+      saveModules(SEED_MODULES);
     }
-
-    setModules(data || []);
+    if (existingLessons.length === 0) {
+      saveLessons(SEED_LESSONS);
+    }
   };
 
-  const loadLessons = async (moduleId: string) => {
-    const { data, error } = await supabase
-      .from('lessons')
-      .select('*')
-      .eq('module_id', moduleId)
-      .order('order_index');
-
-    if (error) {
-      console.error('Error loading lessons:', error);
-      return;
-    }
-
-    setLessons(data || []);
+  const loadModules = () => {
+    initializeData();
+    const data = getModules();
+    setModules(data);
   };
 
-  const handleModuleClick = async (module: Module) => {
+  const loadLessons = (moduleId: string) => {
+    const allLessons = getLessons();
+    const filteredLessons = allLessons
+      .filter(lesson => lesson.module_id === moduleId)
+      .sort((a, b) => a.order_index - b.order_index);
+    setLessons(filteredLessons);
+  };
+
+  const handleModuleClick = (module: Module) => {
     setCurrentModule(module);
-    await loadLessons(module.id);
+    loadLessons(module.id);
     setView('lessons');
   };
 
@@ -89,6 +92,7 @@ function App() {
     const allPassed = results.every(r => r.passed);
     if (allPassed && !isLessonComplete(currentLesson.id)) {
       await markLessonComplete(currentLesson.id, code);
+      setView('celebration');
     }
 
     setIsRunning(false);
@@ -97,48 +101,106 @@ function App() {
   const handleMarkComplete = async () => {
     if (!currentLesson) return;
     await markLessonComplete(currentLesson.id, currentCode);
+    setView('celebration');
   };
 
-  const getLessonStats = (moduleId: string) => {
-    const moduleLessons = lessons.filter(l => l.module_id === moduleId);
-    const completed = moduleLessons.filter(l => isLessonComplete(l.id)).length;
-    return { total: moduleLessons.length, completed };
-  };
 
-  if (loading && view !== 'landing') {
+  useEffect(() => {
+    if (!authLoading && !user && view !== 'landing' && view !== 'auth-signup' && view !== 'auth-login') {
+      setView('landing');
+    }
+  }, [authLoading, user, view]);
+
+  if (authLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-cream-200 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Loading...</p>
+          <div className="w-16 h-16 border-4 border-sunshine-400 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-800 font-bold">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading && view !== 'landing' && view !== 'auth-signup' && view !== 'auth-login') {
+    return (
+      <div className="min-h-screen bg-cream-200 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-sunshine-400 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-800 font-bold">Loading...</p>
         </div>
       </div>
     );
   }
 
   if (view === 'landing') {
-    return <LandingPage onGetStarted={() => setView('modules')} />;
+    return <LandingPage onGetStarted={() => setView('auth-signup')} onLogin={() => setView('auth-login')} />;
+  }
+
+  if (view === 'auth-signup') {
+    return <AuthPage onBack={() => setView('landing')} onSuccess={() => setView('modules')} initialMode="signup" />;
+  }
+
+  if (view === 'auth-login') {
+    return <AuthPage onBack={() => setView('landing')} onSuccess={() => setView('modules')} initialMode="login" />;
+  }
+
+  if (view === 'celebration' && currentLesson && currentModule) {
+    const allLessons = getLessons();
+    const moduleLessons = allLessons.filter(l => l.module_id === currentModule.id);
+    const completedCount = moduleLessons.filter(l => isLessonComplete(l.id)).length;
+    const totalCount = moduleLessons.length;
+    const currentIndex = lessons.findIndex(l => l.id === currentLesson.id);
+    const hasNextLesson = currentIndex !== -1 && currentIndex < lessons.length - 1;
+    const nextLesson = hasNextLesson ? lessons[currentIndex + 1] : null;
+
+    return (
+      <CelebrationPage
+        lesson={currentLesson}
+        moduleTitle={currentModule.title}
+        completedCount={completedCount}
+        totalCount={totalCount}
+        hasNextLesson={hasNextLesson}
+        onContinue={() => setView('lessons')}
+        onNextLesson={nextLesson ? () => handleLessonSelect(nextLesson) : undefined}
+      />
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <header className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <div className="min-h-screen bg-cream-200 flex flex-col">
+      <header className="bg-white border-b-4 border-gray-900">
+        <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
           <button
-            onClick={() => setView('modules')}
+            onClick={() => setView('landing')}
             className="flex items-center gap-3 hover:opacity-80 transition-opacity"
           >
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center">
-              <BookMarked className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 rounded-full bg-sunshine-400 border-3 border-gray-900 flex items-center justify-center">
+              <BookMarked className="w-6 h-6 text-gray-900" />
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">LearnFIL</h1>
-              <p className="text-sm text-gray-600">Master Filecoin Development</p>
+              <p className="text-sm text-gray-700 font-semibold">Master Filecoin Development</p>
             </div>
           </button>
-          <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg">
-            <User className="w-5 h-5 text-gray-600" />
-            <span className="text-sm font-medium text-gray-700">Demo User</span>
+          <div className="flex items-center gap-3">
+            <a
+              href="https://github.com/filecoin-project"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-10 h-10 rounded-full bg-gray-900 hover:bg-gray-800 flex items-center justify-center transition-colors"
+            >
+              <Github className="w-5 h-5 text-white" />
+            </a>
+            <div className="relative">
+              <button
+                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                className="w-10 h-10 rounded-full bg-sunshine-400 hover:bg-sunshine-500 border-3 border-gray-900 flex items-center justify-center transition-all"
+              >
+                <User className="w-5 h-5 text-gray-900" />
+              </button>
+              <ProfileDropdown isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
+            </div>
           </div>
         </div>
       </header>
@@ -147,21 +209,25 @@ function App() {
         {view === 'modules' && (
           <div className="flex-1 overflow-y-auto">
             <div className="max-w-7xl mx-auto px-6 py-8">
-              <div className="mb-8">
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                  Welcome to LearnFIL
-                </h2>
-                <p className="text-lg text-gray-600">
-                  Start your journey to becoming a Filecoin developer with interactive, hands-on lessons.
-                </p>
+              <div className="mb-10 bg-white rounded-3xl p-8 border-4 border-gray-900 relative overflow-hidden">
+                <div className="absolute -top-8 -right-8 w-24 h-24 bg-teal-300 rounded-full border-3 border-gray-900"></div>
+                <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-sunshine-400 rounded-full border-3 border-gray-900"></div>
+                <div className="relative z-10">
+                  <h2 className="text-4xl font-bold text-gray-900 mb-3">
+                    Welcome to LearnFIL
+                  </h2>
+                  <p className="text-lg text-gray-800 font-semibold">
+                    Start your journey to becoming a Filecoin developer with interactive, hands-on lessons.
+                  </p>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {modules.map(module => {
-                  const completedCount = lessons.filter(l =>
-                    l.module_id === module.id && isLessonComplete(l.id)
-                  ).length;
-                  const totalCount = lessons.filter(l => l.module_id === module.id).length;
+                  const allLessons = getLessons();
+                  const moduleLessons = allLessons.filter(l => l.module_id === module.id);
+                  const completedCount = moduleLessons.filter(l => isLessonComplete(l.id)).length;
+                  const totalCount = moduleLessons.length;
 
                   return (
                     <ModuleCard
@@ -188,13 +254,15 @@ function App() {
               onBack={handleBackToModules}
               moduleTitle={currentModule.title}
             />
-            <div className="flex-1 flex items-center justify-center bg-white">
+            <div className="flex-1 flex items-center justify-center bg-cream-100">
               <div className="text-center max-w-md px-6">
-                <BookMarked className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                <div className="w-24 h-24 rounded-full bg-blob-200 border-4 border-gray-900 flex items-center justify-center mx-auto mb-6">
+                  <BookMarked className="w-12 h-12 text-gray-900" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">
                   Select a lesson to begin
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-800 font-semibold">
                   Choose a lesson from the sidebar to start learning about {currentModule.title.toLowerCase()}.
                 </p>
               </div>

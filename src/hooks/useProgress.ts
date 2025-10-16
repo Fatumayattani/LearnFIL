@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import { getProgress, markLessonComplete as saveComplete } from '../utils/localStorage';
 import type { UserProgress } from '../lib/supabase';
 
 export function useProgress(userId: string | null) {
@@ -16,19 +16,14 @@ export function useProgress(userId: string | null) {
     loadProgress();
   }, [userId]);
 
-  const loadProgress = async () => {
+  const loadProgress = () => {
     if (!userId) return;
 
     try {
-      const { data, error } = await supabase
-        .from('user_progress')
-        .select('*')
-        .eq('user_id', userId);
-
-      if (error) throw error;
-
+      const data = getProgress(userId);
       const progressMap = new Map<string, UserProgress>();
-      data?.forEach(item => {
+
+      data.forEach(item => {
         progressMap.set(item.lesson_id, item);
       });
 
@@ -44,34 +39,8 @@ export function useProgress(userId: string | null) {
     if (!userId) return;
 
     try {
-      const existingProgress = progress.get(lessonId);
-
-      if (existingProgress) {
-        const { error } = await supabase
-          .from('user_progress')
-          .update({
-            completed: true,
-            code_submission: codeSubmission,
-            completed_at: new Date().toISOString()
-          })
-          .eq('id', existingProgress.id);
-
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('user_progress')
-          .insert({
-            user_id: userId,
-            lesson_id: lessonId,
-            completed: true,
-            code_submission: codeSubmission,
-            completed_at: new Date().toISOString()
-          });
-
-        if (error) throw error;
-      }
-
-      await loadProgress();
+      saveComplete(userId, lessonId, codeSubmission);
+      loadProgress();
     } catch (error) {
       console.error('Error marking lesson complete:', error);
     }
