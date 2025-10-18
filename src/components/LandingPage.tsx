@@ -15,7 +15,7 @@ export function LandingPage({ onGetStarted, onLogin }: LandingPageProps) {
               <BookMarked className="w-6 h-6 text-gray-900" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">LearnFIL</h1>
+              <h1 className="text-lg font-bold text-gray-900">LearnFIL</h1>
             </div>
           </div>
           <div className="flex items-center gap-3">
