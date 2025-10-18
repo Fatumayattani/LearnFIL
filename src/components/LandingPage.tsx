@@ -25,12 +25,6 @@ export function LandingPage({ onGetStarted, onLogin }: LandingPageProps) {
             >
               Login
             </button>
-            <button
-              onClick={onGetStarted}
-              className="px-6 py-3 bg-sunshine-400 hover:bg-sunshine-500 text-gray-900 font-bold rounded-full border-3 border-gray-900 transition-all"
-            >
-              Get Started
-            </button>
           </div>
         </div>
       </header>
