@@ -19,14 +19,6 @@ export function LandingPage({ onGetStarted, onLogin }: LandingPageProps) {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <a
-              href="https://github.com/Fatumayattani/LearnFIL"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-10 h-10 rounded-full bg-gray-900 hover:bg-gray-800 flex items-center justify-center transition-colors"
-            >
-              <Github className="w-5 h-5 text-white" />
-            </a>
             <button
               onClick={onLogin}
               className="px-6 py-3 bg-white hover:bg-cream-100 text-gray-900 font-bold rounded-full border-3 border-gray-900 transition-all"
@@ -62,7 +54,7 @@ export function LandingPage({ onGetStarted, onLogin }: LandingPageProps) {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-9">
             <button
               onClick={onGetStarted}
               className="group px-8 py-4 bg-sunshine-400 hover:bg-sunshine-500 text-gray-900 font-bold rounded-full border-4 border-gray-900 transition-all flex items-center gap-2 text-lg"
@@ -75,23 +67,7 @@ export function LandingPage({ onGetStarted, onLogin }: LandingPageProps) {
               <span className="text-sm font-semibold">In early beta</span>
             </div>
           </div>
-
-          <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            <div className="bg-white rounded-2xl p-6 border-4 border-gray-900">
-              <div className="text-4xl font-bold text-gray-900 mb-1">3</div>
-              <div className="text-gray-700 font-semibold">Interactive Modules</div>
-            </div>
-            <div className="bg-white rounded-2xl p-6 border-4 border-gray-900">
-              <div className="text-4xl font-bold text-gray-900 mb-1">15+</div>
-              <div className="text-gray-700 font-semibold">Hands-on Lessons</div>
-            </div>
-            <div className="bg-white rounded-2xl p-6 border-4 border-gray-900">
-              <div className="text-4xl font-bold text-gray-900 mb-1">100%</div>
-              <div className="text-gray-700 font-semibold">Free Forever</div>
-            </div>
-          </div>
         </section>
-
         <section className="max-w-7xl mx-auto px-6 py-20">
           <div className="text-center mb-16">
             <h3 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
